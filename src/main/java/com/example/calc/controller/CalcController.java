@@ -3,6 +3,7 @@ package com.example.calc.controller;
 import com.example.calc.ConfigurationApp;
 import com.example.calc.exceptions.CalcException;
 import com.example.calc.service.CalcService;
+import io.corp.calculator.TracerImpl;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -20,8 +21,11 @@ public class CalcController {
 
     private final CalcService calcService;
 
+    private final TracerImpl tracer;
+
     public CalcController(CalcService service){
         this.calcService = service;
+        this.tracer = context.getBean(TracerImpl.class);
     }
 
     /**
@@ -35,8 +39,11 @@ public class CalcController {
         try{
             double response = calcService.sum(Double.parseDouble(num1),Double.parseDouble(num2));
 
+            tracer.trace(response);
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch(Exception e){
+            tracer.trace("ERROR: "+e.getMessage());
             throw new CalcException("ERROR: Please, enter digits only.");
         }
     }
@@ -52,8 +59,11 @@ public class CalcController {
         try{
             double response = calcService.subs(Double.parseDouble(num1),Double.parseDouble(num2));
 
+            tracer.trace(response);
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         }catch(Exception e){
+            tracer.trace("ERROR: "+e.getMessage());
             throw new CalcException("ERROR: Please, enter digits only.");
         }
     }
